@@ -1,13 +1,12 @@
 name: Ma super CI/CD
 
-#ma ci s'execute au push  sur ma branche main
+# La CI s'exécute au push sur la branche main
 on:
   push:
     branches: [ main ]
-
-#les differents jobs
+    
 jobs:
-  #je donne un nom 
+  # Job de build et test
   build-and-test:
     runs-on: ubuntu-latest
 
@@ -15,28 +14,30 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v3
 
-      - name: configurer node.js
+      - name: Configurer node.js
         uses: actions/setup-node@v3
         with:
-         node-version: '16'
+          node-version: '16'
 
-      - name: installation d'une dépendance
+      - name: Installation des dépendances
         run: npm install
 
-      - name: lancement des test unitaires
+      - name: Lancement des tests unitaires
         run: npm run test
 
-      - name: build de l'appli
+      - name: Build de l'appli
         run: npm run build
+
       - name: Test du build (liste du dossier dist)
-        run: ls-la./dist
+        run: ls -la ./dist
+
       - name: Upload du dossier dist
-        uses: action/upload-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: ./dist
-          
-#Job de deploiement 
+
+  # Job de déploiement
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
@@ -46,8 +47,17 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v3
 
-      - name: Deploiement en github page  
+      - name: Download du dossier dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: ./dist
+
+      - name: Test du dist (liste du dossier dist)
+        run: ls -la ./dist
+      
+      - name: Déploiement sur GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
-        with: 
+        with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
