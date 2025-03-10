@@ -28,7 +28,15 @@ jobs:
 
       - name: build de l'appli
         run: npm run build
-
+      - name: Test du build (liste du dossier dist)
+        run: ls-la./dist
+      - name: Upload du dossier dist
+        uses: action/upload-artifact@v4
+        with:
+          name: dist
+          path: ./dist
+          
+#Job de deploiement 
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
